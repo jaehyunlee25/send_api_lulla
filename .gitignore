@@ -35,3 +35,6 @@ yarn-error.log*
 
 # shell script
 exec.sh
+
+# End of https://www.toptal.com/developers/gitignore/api/node
+/static/*.json
