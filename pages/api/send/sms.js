@@ -59,7 +59,7 @@ async function main(req, res) {
   });
 
   return RESPOND(res, {
-    data: qSend.message,
+    // data: qSend.message,
     message: 'SMS 전송에 성공했습니다.',
     resultCode: 200,
   });
