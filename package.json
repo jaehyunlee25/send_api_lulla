@@ -16,6 +16,7 @@
     "firebase-admin": "^9.11.0",
     "jsonwebtoken": "^8.5.1",
     "moment-timezone": "^0.5.33",
+    "mqtt": "^4.2.8",
     "next": "11.1.2",
     "pg": "^8.7.1",
     "react": "17.0.2",
