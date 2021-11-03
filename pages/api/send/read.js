@@ -3,17 +3,16 @@ import {
   ERROR,
   getUserIdFromToken,
   POST,
-  HASH,
 } from '../../../lib/apiCommon';
 import setBaseURL from '../../../lib/pgConn'; // include String.prototype.fQuery
 import CHAT from '../../../lib/chat';
 
 const QTS = {
   // Query TemplateS
-  getChatRoom: 'getChatRoom',
-  newChatRoom: 'newChatRoom',
-  newChatPublish: 'newChatPublish',
-  getPublishById: 'getPublishById',
+  getPublishes: 'getPublishes',
+  setPublishes: 'setPublishes',
+  getPublishResult: 'getPublishResult',
+  getTopic: 'getTopic',
 };
 
 // req.body를 만들지 않도록 한다.
@@ -30,14 +29,14 @@ export default async function handler(req, res) {
   // #2. preflight 처리
   if (req.method === 'OPTIONS') return RESPOND(res, {});
 
-  setBaseURL('sqls/send/chat'); // 끝에 슬래시 붙이지 마시오.
+  setBaseURL('sqls/send/read'); // 끝에 슬래시 붙이지 마시오.
 
   // #3.1.
   try {
     return await main(req, res);
   } catch (e) {
     return ERROR(res, {
-      id: 'ERR.send.chat.3.2.2',
+      id: 'ERR.send.read.3.2.2',
       message: 'send server logic error',
       error: e.toString(),
     });
@@ -52,7 +51,7 @@ async function main(req, res) {
   const userId = qUserId.message;
 
   // const { message, topic } = req.body;
-  const { member_id: memberId, members, message } = req.body;
+  const { member_id: memberId, publish_id: pubId } = req.body;
 
   // #3.2. member 검색
   const qMember = await POST(
@@ -63,62 +62,32 @@ async function main(req, res) {
   );
   if (qMember.type === 'error')
     return qMember.onError(res, '3.2', 'fatal error while searching member');
-  const { schoolId /* , grade, classId , kidId */ } = qMember.message;
+  // const { /* schoolId , grade, classId , kidId */ } = qMember.message;
 
-  // #3.3. 올라 온 members로 HMAC SHA256 생성
-  // #3.3.1. memberId 포함
-  members.push(memberId);
-  // #3.3.2. member 중복 제거
-  const distinctMembers = [...new Set(members)];
-  // #3.3.3. members 정렬
-  distinctMembers.sort();
-  // #3.3.4. distinctMembers를 hmac sha256으로 만들기
-  const topic = HASH(JSON.stringify(distinctMembers));
-  console.log('topic', topic);
+  // #3.2.1. 해당 publish의 topic 정보를 가져온다.
+  const qTopic = await QTS.getTopic.fQuery({ pubId });
+  if (qTopic.type === 'error')
+    return qTopic.onError(res, '3.3', 'searching publishes');
+  const { school_id: schoolId, topic } = qTopic.message.rows[0];
 
-  // #3.4. chat_room에 생성된 방인지 검색
-  const qRoom = await QTS.getChatRoom.fQuery({ schoolId, topic });
-  if (qRoom.type === 'error')
-    return qRoom.onError(res, '3.4', 'searching chat room');
+  // #3.3. 해당 id 이전의 publish 중에 읽지 않은 것들의 id를 모은다.
+  const qPubs = await QTS.getPublishes.fQuery({ pubId, memberId });
+  if (qPubs.type === 'error')
+    return qPubs.onError(res, '3.3', 'searching publishes');
+  const pubIds = qPubs.message.rows[0].pub_ids;
 
-  let chatRoomId;
-  if (qRoom.message.rows.length === 0) {
-    // #3.4.1. 없으면 방 생성
-    const qNewRoom = await QTS.newChatRoom.fQuery({
-      schoolId,
-      topic,
-      members: distinctMembers.sql(),
-    });
-    if (qNewRoom.type === 'error')
-      return qNewRoom.onError(res, '3.4', 'creating chat room');
-    chatRoomId = qNewRoom.message.rows[0].id;
-  } else {
-    chatRoomId = qRoom.message.rows[0].id;
-  }
-
-  // #3.5. chat에 기록
-  const type = 1; // 1. 텍스트, 2. 파일, 3. 알림장, 4. 투약의뢰
-  const readers = [memberId].sql();
-  const unreaders = distinctMembers.minus(memberId).sql();
-  const qNewPub = await QTS.newChatPublish.fQuery({
-    chatRoomId,
-    memberId,
-    type,
-    message,
-    readers,
-    unreaders,
-  });
-  if (qNewPub.type === 'error')
-    return qNewPub.onError(res, '3.4', 'creating chat publish');
-  const pubId = qNewPub.message.rows[0].id;
+  // #3.4. 해당 pubishes의 unreaders / readers 정보를 수정한다(= 읽음 처리한다).
+  const qSets = await QTS.setPublishes.fQuery({ pubIds, memberId });
+  if (qSets.type === 'error')
+    return qSets.onError(res, '3.4', 'updating publishes');
 
   // #3.6. 기록된 chat 정보를 가져온다.
-  const qPub = await QTS.getPublishById.fQuery({ pubId });
-  if (qPub.type === 'error')
-    return qPub.onError(res, '3.4', 'creating chat publish');
-  const result = qPub.message.rows;
+  const qResult = await QTS.getPublishResult.fQuery({ pubIds });
+  if (qResult.type === 'error')
+    return qResult.onError(res, '3.4', 'creating chat publish');
+  const result = qResult.message.rows;
   const jsonMessage = JSON.stringify({
-    useType: 'insert',
+    useType: 'update',
     data: result,
   });
 
@@ -130,7 +99,7 @@ async function main(req, res) {
   if (qSend.type === 'error')
     return ERROR(res, {
       message: 'chatting 메시지 전송에 실패했습니다.',
-      id: 'ERR.send.chat.3.2.1',
+      id: 'ERR.send.read.3.2.1',
       eStr: qSend.eStr,
     });
 
