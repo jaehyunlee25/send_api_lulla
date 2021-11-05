@@ -3,6 +3,6 @@ select
     cr.topic topic
 from 
     chat_publish cp
-	    left join chat_room cr on cr.id = cp.chat_room_id
+    left join chat_room cr on cr.id = cp.chat_room_id
 where 
     cp.id = ${pubId};
