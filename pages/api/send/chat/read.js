@@ -3,9 +3,9 @@ import {
   ERROR,
   getUserIdFromToken,
   POST,
-} from '../../../lib/apiCommon';
-import setBaseURL from '../../../lib/pgConn'; // include String.prototype.fQuery
-import CHAT from '../../../lib/chat';
+} from '../../../../lib/apiCommon';
+import setBaseURL from '../../../../lib/pgConn'; // include String.prototype.fQuery
+import CHAT from '../../../../lib/chat';
 
 const QTS = {
   // Query TemplateS
