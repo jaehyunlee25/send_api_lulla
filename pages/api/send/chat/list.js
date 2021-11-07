@@ -34,7 +34,7 @@ export default async function handler(req, res) {
     return await main(req, res);
   } catch (e) {
     return ERROR(res, {
-      id: 'ERR.send.read.3.2.2',
+      id: 'ERR.send.chat.list.3.2.2',
       message: 'send server logic error',
       error: e.toString(),
       step: EXEC_STEP,
