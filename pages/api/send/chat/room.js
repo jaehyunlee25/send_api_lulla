@@ -9,6 +9,7 @@ import setBaseURL from '../../../../lib/pgConn'; // include String.prototype.fQu
 const QTS = {
   // Query TemplateS
   getMessages: 'getMessages',
+  getMessagesPast: 'getMessagesPast',
   getMember: 'getMember',
 };
 let EXEC_STEP = 0;
@@ -50,7 +51,11 @@ async function main(req, res) {
   const userId = qUserId.message;
 
   // const { message, topic } = req.body;
-  const { member_id: memberId, chat_room_id: chatRoomId } = req.body;
+  const {
+    member_id: memberId,
+    chat_room_id: chatRoomId,
+    publish_id: publishId,
+  } = req.body;
 
   EXEC_STEP = '3.2'; // #3.2. member 검색
   const qMember = await POST(
@@ -74,7 +79,12 @@ async function main(req, res) {
     });
 
   EXEC_STEP = '3.4'; // #3.3. member가 속해 있는 chat_room의 class_id 검색
-  const qList = await QTS.getMessages.fQuery({ chatRoomId });
+  let qList;
+  if (publishId) {
+    qList = await QTS.getMessagesPast.fQuery({ chatRoomId, publishId });
+  } else {
+    qList = await QTS.getMessages.fQuery({ chatRoomId });
+  }
   if (qList.type === 'error')
     return qList.onError(res, '3.4', 'searching publishes');
   const data = qList.message.rows;

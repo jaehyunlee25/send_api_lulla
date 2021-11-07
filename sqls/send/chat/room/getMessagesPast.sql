@@ -17,6 +17,7 @@ from
 	left join file f on f.id = m.image_id
 where
     cp.chat_room_id = '${chatRoomId}'
+    and cp.id < ${publishId}
 order by 
     cp.created_at asc
 limit 30;
