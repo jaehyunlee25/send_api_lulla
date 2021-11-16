@@ -78,16 +78,16 @@ async function main(req, res) {
   const rooms = {};
   const result = {};
   result[schoolId] = [];
-  classes.forEach((classId) => {
-    result[classId] = [];
-  });
+  if (classes)
+    classes.forEach((classId) => {
+      result[classId] = [];
+    });
   list.forEach((item) => {
     if (!rooms[item.id]) rooms[item.id] = [];
     rooms[item.id].push(item);
   });
 
   EXEC_STEP = '3.5'; // 3.5.
-  console.log(schoolId);
   Object.keys(rooms).forEach((roomId) => {
     const room = rooms[roomId];
     const userRoom = room[0];
