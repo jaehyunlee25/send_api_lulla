@@ -66,6 +66,7 @@ async function main(req, res) {
 
   EXEC_STEP = '3.3'; // #3.3.
   const refQuery = [
+    '',
     'getMembersForAdmin',
     'getMembersForAdmin',
     'getMembersForTeacher',
