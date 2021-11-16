@@ -8,7 +8,9 @@ import setBaseURL from '../../../../lib/pgConn'; // include String.prototype.fQu
 
 const QTS = {
   // Query TemplateS
-  getMembers: 'getMembers',
+  getMembersForTeacher: 'getMembersForTeacher',
+  getMembersForAdmin: 'getMembersForAdmin',
+  getMembersForCarer: 'getMembersForCarer',
 };
 let EXEC_STEP = 0;
 
@@ -60,15 +62,30 @@ async function main(req, res) {
   );
   if (qMember.type === 'error')
     return qMember.onError(res, '3.2', 'fatal error while searching member');
-  const { schoolId, grade /* , classId , kidId */ } = qMember.message;
+  const { schoolId, grade, classId /* , kidId */ } = qMember.message;
 
   EXEC_STEP = '3.3'; // #3.3.
-  console.log(grade);
-  const qMembers = await QTS.getMembers.fQuery({ memberId, schoolId });
+  const refQuery = [
+    'getMembersForAdmin',
+    'getMembersForAdmin',
+    'getMembersForTeacher',
+    'getMembersForTeacher',
+    'getMembersForCarer',
+    'getMembersForCarer',
+  ];
+  // QTS.getMembersForAdmin
+  const qMembers = await QTS[refQuery[grade]].fQuery({
+    memberId,
+    schoolId,
+    classId,
+  });
   if (qMembers.type === 'error')
     return qMembers.onError(res, '3.3', 'searching members');
 
+  const data = qMembers.message.rows[0];
+
   return RESPOND(res, {
+    data,
     message: 'chatting 방 목록 전송에 성공했습니다.',
     resultCode: 200,
   });
