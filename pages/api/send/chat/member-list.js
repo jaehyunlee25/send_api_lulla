@@ -26,14 +26,14 @@ export default async function handler(req, res) {
   // #2. preflight 처리
   if (req.method === 'OPTIONS') return RESPOND(res, {});
 
-  setBaseURL('sqls/send/chat/list'); // 끝에 슬래시 붙이지 마시오.
+  setBaseURL('sqls/send/chat/member-list'); // 끝에 슬래시 붙이지 마시오.
 
   // #3.1.
   try {
     return await main(req, res);
   } catch (e) {
     return ERROR(res, {
-      id: 'ERR.send.chat.list.3.2.2',
+      id: 'ERR.send.chat.member-list.3.2.2',
       message: 'send server logic error',
       error: e.toString(),
       step: EXEC_STEP,
