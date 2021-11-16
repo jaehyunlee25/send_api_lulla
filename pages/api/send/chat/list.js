@@ -109,8 +109,10 @@ async function main(req, res) {
 
   EXEC_STEP = '3.6'; // 3.6. 반명을 한글로 바꿔준다(겹치는 반명이 있을 수 있다).
   const userResult = {};
+  console.log(result);
   Object.keys(result).forEach((classId) => {
     const userClass = result[classId];
+    if (userClass.length === 0) return;
     const userItem = userClass[0];
     if (!userResult[userItem.group_name]) userResult[userItem.group_name] = [];
     userClass.forEach((room) => userResult[userItem.group_name].push(room));
