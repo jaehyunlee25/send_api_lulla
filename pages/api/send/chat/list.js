@@ -78,10 +78,13 @@ async function main(req, res) {
   const rooms = {};
   const result = {};
   result[schoolId] = [];
+
+  // 한 번도 채팅을 안 할 경우 classes는 null이다.
   if (classes)
     classes.forEach((classId) => {
       result[classId] = [];
     });
+
   list.forEach((item) => {
     if (!rooms[item.id]) rooms[item.id] = [];
     rooms[item.id].push(item);
@@ -112,6 +115,7 @@ async function main(req, res) {
   console.log(result);
   Object.keys(result).forEach((classId) => {
     const userClass = result[classId];
+    // 채팅을 진행한 방이 없을 수 있다.
     if (userClass.length === 0) return;
     const userItem = userClass[0];
     if (!userResult[userItem.group_name]) userResult[userItem.group_name] = [];
