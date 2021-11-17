@@ -41,4 +41,6 @@ from
 	left join members m on m.id = any(cr.members)
 where
 	cr.id in (select id from chat_room where '${memberId}' = any(members))
-	and m.id != '${memberId}';
+	and m.id != '${memberId}'	
+order by 
+	cr.created_at desc;

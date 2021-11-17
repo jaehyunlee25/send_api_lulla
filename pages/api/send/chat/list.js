@@ -123,7 +123,7 @@ async function main(req, res) {
   });
 
   return RESPOND(res, {
-    data: userResult,
+    data: list,
     message: 'chatting 방 목록 전송에 성공했습니다.',
     resultCode: 200,
   });
