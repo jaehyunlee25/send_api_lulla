@@ -11,6 +11,7 @@ const QTS = {
   getMember: 'getMember',
   getMembers: 'getMembers',
   getMemberGrades: 'getMemberGrades',
+  getChatRoomById: '',
 };
 let EXEC_STEP = 0;
 
@@ -62,7 +63,7 @@ async function main(req, res) {
   );
   if (qMember.type === 'error')
     return qMember.onError(res, '3.2', 'fatal error while searching member');
-  // const { schoolId /* , grade, classId , kidId */ } = qMember.message;
+  const { schoolId /* , grade, classId , kidId */ } = qMember.message;
 
   EXEC_STEP = '3.3'; // #3.3. 검색하고자 하는 chat_room에 memberId가 속해 있는지 검색
   const qMem = await QTS.getMember.fQuery({ chatRoomId, memberId });
@@ -80,9 +81,18 @@ async function main(req, res) {
     return qMembers.onError(res, '3.4', 'searching publishes');
   const { members } = qMembers.message.rows[0];
 
+  EXEC_STEP = '3.5'; // chat_room 검색
+  const qChatRoom = await QTS.getChatRoomById.fQuery({ chatRoomId });
+  if (qChatRoom.type === 'error')
+    return qChatRoom.onError(res, '3.5.1', 'searching chat room by id');
+  const chatRoom = qChatRoom.message.rows[0];
+
   if (members.length !== 2)
     return RESPOND(res, {
       check: 'limited',
+      chat_room_id: chatRoomId,
+      chat_room_topic: [schoolId, chatRoom.topic].join('/'),
+      chat_room_members: chatRoom.members,
       message: '텍스트 혹은 파일만 교환이 가능한 방입니다.',
       resultCode: 200,
     });
@@ -107,6 +117,9 @@ async function main(req, res) {
   if (teacher !== 3 && teacher !== 4)
     return RESPOND(res, {
       check: 'limited',
+      chat_room_id: chatRoomId,
+      chat_room_topic: [schoolId, chatRoom.topic].join('/'),
+      chat_room_members: chatRoom.members,
       message: '텍스트 혹은 파일만 교환이 가능한 방입니다.',
       resultCode: 200,
     });
@@ -114,12 +127,18 @@ async function main(req, res) {
   if (carer !== 5 && carer !== 6)
     return RESPOND(res, {
       check: 'limited',
+      chat_room_id: chatRoomId,
+      chat_room_topic: [schoolId, chatRoom.topic].join('/'),
+      chat_room_members: chatRoom.members,
       message: '텍스트 혹은 파일만 교환이 가능한 방입니다.',
       resultCode: 200,
     });
 
   return RESPOND(res, {
     check: 'full',
+    chat_room_id: chatRoomId,
+    chat_room_topic: [schoolId, chatRoom.topic].join('/'),
+    chat_room_members: chatRoom.members,
     message: '모든 기능이 사용 가능한 방입니다.',
     resultCode: 200,
   });
