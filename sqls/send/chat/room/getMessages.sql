@@ -2,7 +2,7 @@ select
     cp.id,
     m.id sender_id,
 	m.nickname sender_name,
-	split_part(f.thumbnail_address,'/',4) sender_thumbnail,
+	f.id sender_thumbnail,
     cp.type publish_type, 
     cp.message message,
     cardinality(cp.readers) readers,
