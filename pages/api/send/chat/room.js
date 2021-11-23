@@ -87,10 +87,10 @@ async function main(req, res) {
   }
   if (qList.type === 'error')
     return qList.onError(res, '3.4', 'searching publishes');
-  const data = qList.message.rows;
+  const datas = qList.message.rows;
 
   return RESPOND(res, {
-    data,
+    datas,
     message: 'chatting 방 목록 전송에 성공했습니다.',
     resultCode: 200,
   });
