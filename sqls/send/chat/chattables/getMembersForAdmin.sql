@@ -14,7 +14,7 @@ select
                         WHEN sr.grade >= 5 THEN concat(c.name,' ',k.name,'(',m.nickname,')') 
                     END member_nickname, 
                     m.description member_description,
-                    f.address member_image, 
+                    f.id member_image, 
                     c.name class_name, 
                     c.id class_id, 
                     sr.grade member_grade
@@ -53,7 +53,10 @@ select
                                             WHEN sr.grade >= 5 THEN concat(c.name,' ',k.name,'(',m.nickname,')') 
                                         END member_nickname, 
                                         m.description member_description,
-                                        f.address member_image, c.name class_name, c.id class_id, sr.grade member_grade
+                                        f.id member_image, 
+                                        c.name class_name, 
+                                        c.id class_id, 
+                                        sr.grade member_grade
                                     from 
                                         members m 
                                         join users u on u.id = m.user_id 

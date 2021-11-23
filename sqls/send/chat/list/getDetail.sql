@@ -36,6 +36,13 @@ select
 	 from chat_publish where chat_room_id = cr.id order by created_at desc limit 1) send_time,
 	 
 	(select count(*) from chat_publish where chat_room_id = cr.id and '${memberId}' = any(unreaders)) unreads
+
+	(
+		SELECT array_agg(m.image_id)
+		FROM chat_room 
+		LEFT JOIN members m ON m.id = any(chat_room.members)
+		WHERE chat_room.id = cr.id
+	) thumbnails
 from 
 	chat_room cr
 	left join members m on m.id = any(cr.members)
