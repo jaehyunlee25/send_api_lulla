@@ -35,7 +35,7 @@ select
 		end 
 	 from chat_publish where chat_room_id = cr.id order by created_at desc limit 1) send_time,
 	 
-	(select count(*) from chat_publish where chat_room_id = cr.id and '${memberId}' = any(unreaders)) unreads
+	(select count(*) from chat_publish where chat_room_id = cr.id and '${memberId}' = any(unreaders)) unreads,
 
 	(
 		SELECT array_agg(m.image_id)
