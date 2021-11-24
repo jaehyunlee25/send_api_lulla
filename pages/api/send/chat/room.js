@@ -11,6 +11,7 @@ const QTS = {
   getMessages: 'getMessages',
   getMessagesPast: 'getMessagesPast',
   getMember: 'getMember',
+  getMembers: 'getMembers',
 };
 let EXEC_STEP = 0;
 
@@ -78,7 +79,7 @@ async function main(req, res) {
       message: '해당 채팅방의 정보를 얻을 권한이 없습니다.',
     });
 
-  EXEC_STEP = '3.4'; // #3.3.
+  EXEC_STEP = '3.4'; // #3.3. 채팅방 메시지 조회
   let qList;
   if (publishId) {
     qList = await QTS.getMessagesPast.fQuery({ chatRoomId, publishId });
@@ -89,8 +90,15 @@ async function main(req, res) {
     return qList.onError(res, '3.4', 'searching publishes');
   const datas = qList.message.rows;
 
+  EXEC_STEP = '3.5'; // 채팅방 멤버 조회
+  const qMembers = await QTS.getMembers.fQuery({ chatRoomId });
+  if (qMembers.type === 'error')
+    return qMembers.onError(res, '3.5', 'searching members');
+  const { members } = qMembers.message.rows[0];
+
   return RESPOND(res, {
     datas,
+    members,
     message: 'chatting 방 목록 전송에 성공했습니다.',
     resultCode: 200,
   });
