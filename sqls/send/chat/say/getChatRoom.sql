@@ -3,5 +3,5 @@ select
 from
     chat_room
 where
-    id = '${roomId}'
+    id = '${chatRoomId}'
     and school_id = '${schoolId}';

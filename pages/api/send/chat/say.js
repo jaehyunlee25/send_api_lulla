@@ -52,7 +52,7 @@ async function main(req, res) {
   const userId = qUserId.message;
 
   // const { message, topic } = req.body;
-  const { member_id: memberId, chat_room_id: roomId, message } = req.body;
+  const { member_id: memberId, chat_room_id: chatRoomId, message } = req.body;
 
   EXEC_STEP = '3.2'; // #3.2. member 검색
   const qMember = await POST(
@@ -66,7 +66,7 @@ async function main(req, res) {
   const { schoolId /* , grade, classId , kidId */ } = qMember.message;
 
   EXEC_STEP = '3.3'; // 존재하는 room인지 검증(원도 함께 검색해서 검증)
-  const qRoom = await QTS.getChatRoom.fQuery({ roomId, schoolId });
+  const qRoom = await QTS.getChatRoom.fQuery({ chatRoomId, schoolId });
   if (qRoom.type === 'error')
     return qRoom.onError(res, '3.4', 'searching the room in the school');
 
@@ -78,7 +78,10 @@ async function main(req, res) {
     });
 
   EXEC_STEP = '3.4'; // room에 속하는 memberId인지 검증
-  const qCheckMem = await QTS.getChatRoomByMember.fQuery({ roomId, memberId });
+  const qCheckMem = await QTS.getChatRoomByMember.fQuery({
+    chatRoomId,
+    memberId,
+  });
   if (qCheckMem.type === 'error')
     return qCheckMem.onError(res, '3.4', 'creating chat publish');
 
@@ -95,7 +98,7 @@ async function main(req, res) {
   const readers = [memberId].sql();
   const unreaders = distinctMembers.minus(memberId).sql();
   const qNewPub = await QTS.newChatPublish.fQuery({
-    roomId,
+    chatRoomId,
     memberId,
     type,
     message,
