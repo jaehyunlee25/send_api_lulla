@@ -49,6 +49,7 @@ async function main(req, res) {
   const { message, phone } = req.body;
   // #3.2
   const qSend = await SMS({
+    subject: '[랄라] 알림',
     content: message,
     phone,
   });
